@@ -1,6 +1,6 @@
 {
   "name": "@bothadev/al-cli",
-  "version": "0.1.1",
+  "version": "1.0.0",
   "description": "A CLI tool for creation and of AL Templates",
   "main": "./lib/index.js",
   "bin": {
