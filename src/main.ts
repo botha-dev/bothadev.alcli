@@ -3,7 +3,7 @@ import fsExtra from "fs-extra";
 import fsPromise from "fs/promises";
 import chalk from "chalk";
 
-interface YargArgs {
+export interface YargArgs {
     [x: string]: unknown;
     type: string;
     name: string;
