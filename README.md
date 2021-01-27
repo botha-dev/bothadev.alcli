@@ -6,17 +6,12 @@ A Simple CLI tool to quickly create .al files for Business Central Development.
 
 npm install -g @bothadev\al-cli 
 
-Install globally.
-
 ## Usage
+### New
 
-AL / AL-CLI -t <Type of Object> -n <folder to create in>/<Name of Object> [OPTIONS]
+index.js new
 
-Example:
-
-al -t table -n foo/bar 
-
-Creates a new bar.table.al file in Folder foo. Folder will be created if it does not exist. 
+Create new AL Object.
 
 Options:
       --help     Show help                                             [boolean]
@@ -25,5 +20,29 @@ Options:
              [required] [choices: "table", "tableextension", "page", "cardpage",
                       "listpage", "pageextension", "report", "codeunit", "enum"]
   -n, --name     Object Name to create.                      [string] [required]
-  -i, --id       Object ID to create.                  [number] [default: 50100]
-  -e, --extends  Object Name to extend.                 [string] [default: """"]
+  -i, --id       Object ID to create.                  [number] [default: 50500]
+  -e, --extends  Object Name to extend.                   [string] [default: ""]
+
+Examples:
+  Example: AL new -t table -n testa  Creates a new table file from template with
+                                     a the name testa.table.al.
+
+### Version
+## NOTE 
+Still in progress. Working Flow:
+
+Execute version actions, like setting new version or incremental versions.
+
+Commands:
+  index.js version patch  Updates index four of version number in app.json file.
+  index.js version minor  Updates index three of version number and sets index
+                          four to zero.
+  index.js version major  Updates index one of version number and sets all other
+                          indexes to zero.
+
+Options:
+  --help     Show help                                                 [boolean]
+  --version  Show version number                                       [boolean]
+
+Examples:
+  Example: AL version patch  Updates patch version number of Extension.
