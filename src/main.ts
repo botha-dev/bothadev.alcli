@@ -88,9 +88,9 @@ export async function createObject(args: YargArgs) {
     });
 
     fsExtra.ensureDir(dirs.targetDirectory).then(() => {
-        console.log("%s target folder of %s.", chalk.cyan('CHECK'), dirs.targetDirectory);
+        console.log("%s target folder of %s.", chalk.cyan('ENSURE-DIR'), dirs.targetDirectory);
     }).catch((err) => {
-        console.error('%s Base Folder %s not in current directory and could not be created. %s', chalk.red.bold('ENSURE-DIR'), dirs.targetDirectory, err);
+        console.error('%s Base Folder %s not in current directory and could not be created. %s', chalk.red.bold('ERROR'), dirs.targetDirectory, err);
     })
 
     try {
