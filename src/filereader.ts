@@ -14,7 +14,8 @@ class fileReader {
             id = Number(tempLineArr[1]);
             stream.destroy();
 
-        })
+        });
+
         return id;
     }
 }

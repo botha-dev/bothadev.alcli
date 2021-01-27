@@ -1,8 +1,17 @@
 #! /usr/bin/env node
+import path from 'path';
 import * as yargs from 'yargs';
-import { createObject, YargArgs } from './main.js';
+import { getIDRange, getOrSetIdRange, IDRange, YargArgs } from './interfaces.js';
+import { createObject, validateCurrWorkingDirectory } from './main.js';
 
-function main(argv: string[]) {
+async function main(argv: string[]) {
+
+    let idRange = getIDRange();
+
+    await validateCurrWorkingDirectory();
+    
+    idRange = getIDRange();
+
     const args = yargs
         .command('new', 'Create new AL Object.', function (yargs) {
             return yargs.options({
@@ -22,14 +31,14 @@ function main(argv: string[]) {
                 id: {
                     alias: 'i',
                     type: 'number',
-                    default: 50100,
+                    default: idRange.from,
                     description: 'Object ID to create.'
                 },
                 extends: {
                     alias: 'e',
                     description: 'Object Name to extend.',
                     type: 'string',
-                    default: '""'
+                    default: ''
                 }
             })
                 .example('Example: AL new -t table -n testa', 'Creates a new table file from template with a the name testa.table.al.')
