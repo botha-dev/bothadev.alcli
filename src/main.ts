@@ -68,7 +68,7 @@ function handleFileName(args: YargArgs, filename: string) {
 
 export async function createObject(args: YargArgs) {
     let dirs: Directories;
-    let baseFolder = 'src2/';
+    let baseFolder = 'src/';
     let folder = '';
     let slashPos = args.name.indexOf('/');
     if (slashPos > -1) {
