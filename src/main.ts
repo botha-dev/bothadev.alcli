@@ -2,31 +2,19 @@ import path from "path";
 import fsExtra from "fs-extra";
 import fsPromise from "fs/promises";
 import chalk from "chalk";
+import { YargArgs, Directories, IDRange, setIDRange } from "./interfaces";
 
-interface YargArgs {
-    [x: string]: unknown;
-    type: string;
-    name: string;
-    id: number;
-    extends: string | undefined;
-    _: (string | number)[]; $0: string;
-}
-
-interface Directories {
-    templateDirectory: string, 
-    targetDirectory: string
-}
-
-const capitalize = (s: string) => {
+function capitalize(s: string) {
     return s.charAt(0).toUpperCase() + s.slice(1);
 }
-async function copyTemplateFiles(args: YargArgs, dirs: Directories){
+
+async function copyTemplateFiles(args: YargArgs, dirs: Directories) {
     return fsPromise.readdir(dirs.templateDirectory)
-    .then(async (files: string[]) => {
-        for (let file of files) {
-            await handleTemplateFile(file, args, dirs);
-        }
-    })
+        .then(async (files: string[]) => {
+            for (let file of files) {
+                await handleTemplateFile(file, args, dirs);
+            }
+        })
 }
 
 async function handleTemplateFile(file: string, args: YargArgs, dirs: Directories) {
@@ -57,51 +45,85 @@ async function handleTemplateFile(file: string, args: YargArgs, dirs: Directorie
 
 }
 
-function handleFileName(args:YargArgs, filename: string) {
-   let tempName: string;
-   let tempNameSplit: string[];
-   let file: string;
-   
-   tempName = args.name;
-   tempNameSplit = tempName.split(' ');
-   file = '';
+function handleFileName(args: YargArgs, filename: string) {
+    let tempName: string;
+    let tempNameSplit: string[];
+    let file: string;
 
-   if (tempNameSplit.length > 1) {
-      for (let k = 0; k < tempNameSplit.length; k++) {
-          var el = capitalize(tempNameSplit[k]);
-          file += el;
-      } 
-   } else {
-      file = tempName; 
-   }
-   file = file + filename;
-   return file;
+    tempName = args.name;
+    tempNameSplit = tempName.split(' ');
+    file = '';
+
+    if (tempNameSplit.length > 1) {
+        for (let k = 0; k < tempNameSplit.length; k++) {
+            var el = capitalize(tempNameSplit[k]);
+            file += el;
+        }
+    } else {
+        file = tempName;
+    }
+    file = file + filename;
+    return file;
 }
-export async function createObject(args: YargArgs ) {
-    let dirs: Directories;
 
+export async function createObject(args: YargArgs) {
+    let dirs: Directories;
+    let baseFolder = 'src/';
     let folder = '';
     let slashPos = args.name.indexOf('/');
     if (slashPos > -1) {
-       folder = args.name.substr(0, slashPos) ;
-       args.name = args.name.substr(slashPos + 1);
+        folder += args.name.substr(0, slashPos);
+        args.name = args.name.substr(slashPos + 1);
     }
 
     dirs = {
-        targetDirectory : path.join(process.cwd(), folder),
-        templateDirectory : path.join(__dirname,'../templates',args.type.toLowerCase()) 
+        targetDirectory: path.join(process.cwd(), baseFolder, folder),
+        templateDirectory: path.join(__dirname, '../templates', args.type.toLowerCase())
     };
 
-   fsExtra.ensureDir(dirs.targetDirectory, ((err: Error)=> console.log(err))); 
+    fsExtra.ensureDir(path.join(process.cwd(), baseFolder)).then(() => {
+        console.log("%s base folder %s found or created.", chalk.cyan('ENSURE-DIR'), baseFolder);
+    }).catch((err) => {
+        console.error('%s Base Folder %s not in current directory and could not be created. %s', chalk.red.bold('ERROR'), baseFolder, err);
+    });
 
-   try {
-       await fsPromise.access(dirs.targetDirectory);
-   } catch (err: any) {
-       console.error('%s Invalid Template Name', chalk.red.bold('ERROR'));
-       process.exit(1);
-   }
-   console.log('Creating Template Files...');
-   await copyTemplateFiles(args, dirs);
+    fsExtra.ensureDir(dirs.targetDirectory).then(() => {
+        console.log("%s target folder of %s.", chalk.cyan('ENSURE-DIR'), dirs.targetDirectory);
+    }).catch((err) => {
+        console.error('%s Base Folder %s not in current directory and could not be created. %s', chalk.red.bold('ERROR'), dirs.targetDirectory, err);
+    })
 
-   console.log('%s Object Create.', chalk.green.bold('DONE'));
+    try {
+        console.log(dirs.targetDirectory);
+        await fsPromise.access(dirs.targetDirectory);
+    } catch (err: any) {
+        console.error('%s Invalid Template Name', chalk.red.bold('ERROR'));
+        process.exit(1);
+    }
+
+    console.log('Creating Template Files...');
+    await copyTemplateFiles(args, dirs);
+
+    console.log('%s Object Create Complete.', chalk.green.bold('SUCCESS'));
+
+}
+
+export async function validateCurrWorkingDirectory() {
+    const cwd = process.cwd();
+    const appJsonFilePath = path.join(cwd, 'app.json');
+
+    try {
+        await fsPromise.access(appJsonFilePath);
+    } catch (err: any) {
+        console.error('%s No app.json file found in working directory.', chalk.red.bold('ERROR'));
+        process.exit(0);
+    }
+
+    let appJsonBuffer = fsExtra.readFileSync(appJsonFilePath);
+    let appJson = JSON.parse(appJsonBuffer.toString());
+    let idRange: IDRange = {
+        from: appJson['idRanges'][0]['from'],
+        to: appJson['idRanges'][0]['to']
+    }
+    setIDRange(idRange);
 }
